@@ -2,9 +2,9 @@ name: CodeQL
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
   schedule:
     # Weekly, so queries and the CodeQL engine updates are applied even
     # without new commits.
@@ -31,9 +31,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The project language (javascript-typescript, go, python, ...) plus the
+        # The project language (java-kotlin, javascript-typescript, go, ...) plus the
         # GitHub Actions workflow files themselves (injection, permissions, ...).
-        language: [javascript-typescript, actions]
+        language: [java-kotlin, actions]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
