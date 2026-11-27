@@ -1,0 +1,81 @@
+name: Deploy to Play Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: "Track to upload the new build to"
+        required: true
+        default: internal
+        type: choice
+        options:
+          - internal
+          - alpha
+          - production
+      promote_to:
+        description: "Also promote this same build to another track without re-uploading (e.g. alpha for closed testing). Leave blank to skip."
+        required: false
+        type: string
+      rollout:
+        description: "Staged rollout fraction for production, e.g. 0.1 = 10% of users. Leave blank for 100%."
+        required: false
+        type: string
+      changelog:
+        description: "What's new (English)"
+        required: true
+      changelog_fr:
+        description: "Quoi de neuf (French)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1.321.0
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Decode signing keystore
+        run: |
+          mkdir -p keystore
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > keystore/upload-keystore.jks
+
+      - name: Write local.properties
+        run: |
+          cat >> local.properties <<EOF
+          RELEASE_STORE_FILE=keystore/upload-keystore.jks
+          RELEASE_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF
+
+      - name: Decode Play service account key
+        run: echo "${{ secrets.PLAY_STORE_JSON_KEY_BASE64 }}" | base64 -d > fastlane/play-service-account.json
+
+      - name: Deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bundle exec fastlane deploy track:${{ inputs.track }} rollout:"${{ inputs.rollout }}" changelog:"${{ inputs.changelog }}" changelog_fr:"${{ inputs.changelog_fr }}"
+
+      - name: Promote
+        if: ${{ inputs.promote_to != '' }}
+        run: bundle exec fastlane promote from:${{ inputs.track }} to:${{ inputs.promote_to }} rollout:"${{ inputs.rollout }}"

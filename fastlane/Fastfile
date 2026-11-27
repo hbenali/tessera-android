@@ -1,0 +1,142 @@
+opt_out_usage
+
+require "digest"
+require "shellwords"
+require "tempfile"
+
+default_platform(:android)
+
+# Fastlane's own CWD while running plain Ruby code in the Fastfile is the fastlane/ folder
+# itself (built-in actions like `gradle`/`upload_to_play_store` do their own path resolution
+# relative to the project root, but raw File.read/File.write here do not) - so paths below are
+# built from this file's own directory rather than assumed-relative ones.
+PROJECT_ROOT = File.expand_path("..", __dir__)
+
+def read_version_code
+  content = File.read(File.join(PROJECT_ROOT, "app/build.gradle"))
+  match = content.match(/versionCode\s+(\d+)/)
+  UI.user_error!("Could not find versionCode in app/build.gradle") unless match
+  match[1].to_i
+end
+
+def read_version_name
+  content = File.read(File.join(PROJECT_ROOT, "app/build.gradle"))
+  match = content.match(/versionName\s+"([^"]+)"/)
+  UI.user_error!("Could not find versionName in app/build.gradle") unless match
+  match[1]
+end
+
+def write_changelog(version_code, changelog_en, changelog_fr)
+  if changelog_en
+    dir = File.join(__dir__, "metadata/android/en-US/changelogs")
+    FileUtils.mkdir_p(dir)
+    File.write(File.join(dir, "#{version_code}.txt"), changelog_en)
+  end
+  if changelog_fr
+    dir = File.join(__dir__, "metadata/android/fr-FR/changelogs")
+    FileUtils.mkdir_p(dir)
+    File.write(File.join(dir, "#{version_code}.txt"), changelog_fr)
+  end
+end
+
+platform :android do
+  # Play Developer API track ids don't match the Play Console UI names: "Closed testing" is
+  # "alpha", "Open testing" is "beta". "internal" and "production" match as-is.
+  desc "Build a release bundle and upload it to a Play Console track (defaults to internal testing). Usage: fastlane deploy [track:alpha] [rollout:0.1] [changelog:\"what's new\"] [changelog_fr:\"quoi de neuf\"]"
+  lane :deploy do |options|
+    track = options[:track] || "internal"
+    write_changelog(read_version_code, options[:changelog], options[:changelog_fr])
+
+    gradle(
+      task: "bundleRelease",
+    )
+
+    upload_to_play_store(
+      track: track,
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      # The gradle action's lane context also lists any stray debug/release APKs sitting in
+      # build outputs from prior builds - without this, supply refuses to upload since it sees
+      # both an aab and apk_paths set.
+      skip_upload_apk: true,
+      # Metadata/screenshots aren't managed through fastlane yet - just ship the binary.
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      # Staged rollout, e.g. rollout:0.1 for 10% of users (production only; blank = 100%).
+      rollout: options[:rollout],
+    )
+
+    # For users without Play Store access - a directly-installable, self-signed APK (the AAB
+    # Play just got is only installable once Play App Signing re-signs and serves it). Publishing
+    # a GitHub release with a non-existent tag also creates that tag for us, at the tip of the
+    # default branch.
+    gradle(task: "assembleRelease")
+    version_name = read_version_name
+    version_code = read_version_code
+    apk_path = File.join(PROJECT_ROOT, "app/build/outputs/apk/release/app-release.apk")
+    # Published so anyone downloading the APK from here (rather than Play Store) can verify it
+    # wasn't corrupted/tampered with in transit - see the README section on verifying it.
+    apk_sha256 = Digest::SHA256.file(apk_path).hexdigest
+    notes = [
+      options[:changelog],
+      options[:changelog_fr],
+      "SHA-256 checksum of `app-release.apk`:\n```\n#{apk_sha256}\n```",
+    ].compact.join("\n\n")
+
+    # Uses the gh CLI rather than fastlane's set_github_release (Octokit-based) action - the
+    # latter failed to authenticate against this repo with the same GITHUB_TOKEN despite it
+    # being passed explicitly, while gh (already used elsewhere in CI) picks it up from the
+    # environment reliably.
+    notes_file = Tempfile.new(["release-notes", ".md"])
+    begin
+      notes_file.write(notes)
+      notes_file.close
+      cmd = [
+        "gh", "release", "create", "v#{version_name}",
+        apk_path,
+        "--repo", "hbenali/tessera-android",
+        "--title", "v#{version_name} (#{version_code})",
+        "--notes-file", notes_file.path,
+      ].map { |a| Shellwords.escape(a) }.join(" ")
+      sh(cmd)
+    ensure
+      notes_file.unlink
+    end
+  end
+
+  desc "Promote an already-uploaded release to another track without re-uploading the binary. Usage: fastlane promote from:internal to:alpha [rollout:0.1]"
+  lane :promote do |options|
+    from_track = options[:from] || UI.user_error!("Pass from:<track> (the track the build is currently on)")
+    to_track = options[:to] || UI.user_error!("Pass to:<track> (the track to promote it to)")
+
+    upload_to_play_store(
+      track: from_track,
+      track_promote_to: to_track,
+      rollout: options[:rollout],
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: true,
+    )
+  end
+
+  desc "Update the release notes on an already-uploaded track version, without re-uploading the binary. Usage: fastlane notes changelog:\"what's new\" changelog_fr:\"quoi de neuf\" [track:internal] [version_code:15]"
+  lane :notes do |options|
+    UI.user_error!("Pass changelog:\"...\" and/or changelog_fr:\"...\"") unless options[:changelog] || options[:changelog_fr]
+    track = options[:track] || "internal"
+    version_code = options[:version_code] || read_version_code
+    write_changelog(version_code, options[:changelog], options[:changelog_fr])
+
+    upload_to_play_store(
+      track: track,
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      version_code: version_code,
+    )
+  end
+end

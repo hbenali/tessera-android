@@ -1,0 +1,34 @@
+# dependencies and build output
+node_modules/
+vendor/
+dist/
+bin/*
+!bin/tessera-android
+*.exe
+coverage/
+*.out
+*.test
+
+# editors, OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# local secrets and keys: never commit these
+.env
+.env.*
+*.pem
+*.key
+
+# Play / signing
+local.properties
+*.jks
+*.keystore
+keystore/
+fastlane/play-service-account.json
+fastlane/report.xml
+vendor/bundle/
+.gradle/
+build/
+app/build/
