@@ -1,0 +1,1 @@
+A fast, private Matrix chat client: rooms, threads, calls and E2E encryption.

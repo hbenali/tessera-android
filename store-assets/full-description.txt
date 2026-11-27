@@ -1,0 +1,26 @@
+Tessera is a fast, private chat app for Matrix, the open network for secure messaging. Sign in with any Matrix homeserver (matrix.org, Synapse, or your own) and keep your conversations, your keys and your choices.
+
+WHY TESSERA
+• Fast and light: opens quickly, long rooms stay smooth.
+• Private by design: no ads, no analytics, no tracking. Your data stays with your homeserver.
+• End-to-end encryption, with session verification and key backup export and import.
+• Workspace feel: one list of conversations with previews, unread, mentions, favourites, people and rooms, plus spaces, threads in a side panel, pinned messages and a quick switcher.
+
+WHAT YOU CAN DO
+• Send messages with Markdown, replies, reactions, polls, photos, videos, voice messages and files.
+• Make voice and video calls in direct chats.
+• Share your location, only when you choose to.
+• Explore public rooms and join them, or ask to join.
+• Moderate rooms: roles, remove, ban, report to the server administrators.
+• Background notifications with quick replies, mark as read and like, without the message text ever passing through the developer's gateway.
+• Use several accounts and switch between them in one tap.
+• Export a conversation as an image, PDF or CSV.
+• Share text, links and files into Tessera from other apps, and open matrix: links.
+
+YOURS TO CUSTOMISE
+Eight themes (including a high-contrast one), four room layouts, comfortable or compact density, three text sizes and a list display you can resize and fold. Available in English, French, Spanish and German.
+
+OPEN SOURCE
+Tessera is free and open source (MIT): github.com/hbenali/tessera
+
+Tessera is an independent client and is not affiliated with the Matrix.org Foundation. You need an account on a Matrix homeserver to use it.
