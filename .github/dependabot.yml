@@ -1,6 +1,6 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
+  - package-ecosystem: "gradle"
     directory: "/"
     schedule:
       interval: "weekly"
@@ -11,14 +11,19 @@ updates:
       default-days: 3
     commit-message:
       prefix: "chore(deps)"
-      prefix-development: "chore(deps-dev)"
     groups:
-      dev-dependencies:
-        dependency-type: "development"
+      dependencies:
+        patterns: ["*"]
         update-types: ["minor", "patch"]
-      production-dependencies:
-        dependency-type: "production"
-        update-types: ["minor", "patch"]
+
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 3
+    commit-message:
+      prefix: "chore(deps)"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -32,12 +37,3 @@ updates:
       actions:
         patterns: ["*"]
         update-types: ["minor", "patch"]
-
-  - package-ecosystem: "docker"
-    directories:
-      - "/"
-      - "/test/compose/containers-podman"
-    schedule:
-      interval: "weekly"
-    commit-message:
-      prefix: "chore(docker)"
