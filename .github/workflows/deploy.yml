@@ -49,7 +49,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1.321.0
+        uses: ruby/setup-ruby@v1.344.0
         with:
           ruby-version: "3.3"
           bundler-cache: true
