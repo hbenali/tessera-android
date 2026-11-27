@@ -1,0 +1,26 @@
+Tessera est une application de messagerie rapide et privée pour Matrix, le réseau ouvert de messagerie sécurisée. Connectez-vous avec n'importe quel serveur Matrix (matrix.org, Synapse ou le vôtre) et gardez vos conversations, vos clés et vos choix.
+
+POURQUOI TESSERA
+• Rapide et léger : s'ouvre vite, les longs salons restent fluides.
+• Privé par conception : ni publicité, ni statistiques, ni suivi. Vos données restent chez votre serveur.
+• Chiffrement de bout en bout, avec vérification des sessions, export et import des clés.
+• Un esprit « espace de travail » : une seule liste de conversations avec aperçus, non-lus, mentions, favoris, personnes et salons, plus les espaces, les fils dans un panneau latéral, les messages épinglés et un sélecteur rapide.
+
+CE QUE VOUS POUVEZ FAIRE
+• Envoyer des messages avec Markdown, réponses, réactions, sondages, photos, vidéos, messages vocaux et fichiers.
+• Passer des appels vocaux et vidéo dans les conversations privées.
+• Partager votre position, uniquement quand vous le décidez.
+• Explorer et rejoindre des salons publics, ou demander à les rejoindre.
+• Modérer les salons : rôles, suppression, bannissement, signalement aux administrateurs du serveur.
+• Notifications en arrière-plan avec réponses rapides, marquer comme lu et « j'aime », sans que le texte des messages ne passe par la passerelle du développeur.
+• Utiliser plusieurs comptes et passer de l'un à l'autre en un geste.
+• Exporter une conversation en image, PDF ou CSV.
+• Partager du texte, des liens et des fichiers vers Tessera depuis d'autres applications, et ouvrir les liens matrix:.
+
+À VOTRE IMAGE
+Huit thèmes (dont un à fort contraste), quatre mises en page de salon, densité confortable ou compacte, trois tailles de texte et une liste redimensionnable. Disponible en anglais, français, espagnol et allemand.
+
+LIBRE
+Tessera est gratuit et open source (MIT) : github.com/hbenali/tessera
+
+Tessera est un client indépendant, sans lien avec la Matrix.org Foundation. Il faut un compte sur un serveur Matrix pour l'utiliser.
