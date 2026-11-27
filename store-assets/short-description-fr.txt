@@ -1,1 +1,1 @@
-Client Matrix rapide et privé : salons, fils, appels, chiffrement de bout en bout.
+Client Matrix rapide et privé : salons, fils, appels et chiffrement E2E.
