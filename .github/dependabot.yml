@@ -11,6 +11,11 @@ updates:
       default-days: 3
     commit-message:
       prefix: "chore(deps)"
+    ignore:
+      # Gradle 9 dropped jcenter() and needs a newer Android Gradle Plugin than the
+      # Bubblewrap-generated project uses; upgrade the toolchain by hand.
+      - dependency-name: "gradle-wrapper"
+        update-types: ["version-update:semver-major"]
     groups:
       dependencies:
         patterns: ["*"]
